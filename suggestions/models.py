@@ -1,16 +1,69 @@
 from django.db import models
 
-# MODELS
+GENDER_CHOICES = [
+    ("male", "مرد"),
+    ("female", "زن"),
+]
+
+RELATION_CHOICES = [
+    ("friend", "یک دوست صمیمی"),
+    ("family", "یکی از اعضای خانواده"),
+    ("partner", "یک پارتنر عاشقانه"),
+    ("colleague", "یک همکار یا آشنا"),
+]
+
+AGE_GROUP_CHOICES = [
+    ("teen", "نوجوان (۱۰ تا ۱۸ سال)"),
+    ("young", "جوان (۱۸ تا ۳۵ سال)"),
+    ("adult", "بزرگسال (۳۵ تا ۵۰ سال)"),
+    ("senior", "میانسال یا مسن (۵۱ سال به بالا)"),
+]
+
+BUDGET_CHOICES = [
+    ("low", "کمتر از ۱۰۰ هزار تومان"),
+    ("medium", "بین ۱۰۰ هزار تا ۱ میلیون تومان"),
+    ("high", "بین ۱ تا ۵ میلیون تومان"),
+    ("very_high", "بیشتر از ۵ میلیون تومان"),
+]
+
+INTEREST_CHOICES = [
+    ("tech", "تکنولوژی و گجت‌ها"),
+    ("fashion", "مد و استایل"),
+    ("art", "هنر"),
+    ("books", "کتاب و مطالعه"),
+    ("cooking", "آشپزی و غذا"),
+    ("sports", "ورزش"),
+    ("travel", "سفر و ماجراجویی"),
+    ("gaming", "بازی و گیمینگ"),
+    ("movies", "فیلم و سریال"),
+]
+
+# --- GiftCondition Model ---
+class GiftCondition(models.Model):
+    gender = models.CharField(max_length=50, choices=GENDER_CHOICES)
+    relation = models.CharField(max_length=50, choices=RELATION_CHOICES)
+    age_group = models.CharField(max_length=50, choices=AGE_GROUP_CHOICES)
+    budget = models.CharField(max_length=50, choices=BUDGET_CHOICES)
+    interests = models.JSONField(default=list, blank=True)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["gender", "relation", "age_group", "budget", "interests"],
+                name="unique_condition"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.gender} - {self.relation} - {self.age_group} - {self.budget}"
+
+
 class GiftSuggestion(models.Model):
-    gender = models.CharField(max_length=50)
-    relation = models.CharField(max_length=50)
-    age_group = models.CharField(max_length=50)
-    interest = models.CharField(max_length=50)
-    budget = models.CharField(max_length=50)
+    condition = models.ForeignKey(GiftCondition, related_name='suggestions', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
     image_url = models.URLField()
     product_url = models.URLField()
+    score = models.FloatField()
 
     def as_dict(self):
         return {
@@ -18,7 +71,8 @@ class GiftSuggestion(models.Model):
             "product-description": self.description,
             "product-image": self.image_url,
             "product_url": self.product_url,
+            "score": self.score,
         }
 
     def __str__(self):
-        return f"{self.title} ({self.gender}, {self.relation}, {self.age_group})"
+        return f"{self.title} (Score: {self.score})"
