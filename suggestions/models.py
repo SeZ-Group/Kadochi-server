@@ -44,17 +44,17 @@ class GiftCondition(models.Model):
     relation = models.CharField(max_length=50, choices=RELATION_CHOICES)
     age_group = models.CharField(max_length=50, choices=AGE_GROUP_CHOICES)
     budget = models.CharField(max_length=50, choices=BUDGET_CHOICES)
-    interests = models.JSONField(default=list, blank=True)
+    interest = models.CharField(max_length=50, choices=INTEREST_CHOICES)
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["gender", "relation", "age_group", "budget", "interests"],
+                fields=["gender", "relation", "age_group", "budget", "interest"],
                 name="unique_condition"
             )
         ]
 
     def __str__(self):
-        return f"{self.gender} - {self.relation} - {self.age_group} - {self.budget}"
+        return f"{self.gender} - {self.relation} - {self.age_group} - {self.budget} - {self.interest}"
 
 
 class GiftSuggestion(models.Model):
